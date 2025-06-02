@@ -2,9 +2,12 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 using namespace std;
-
+using namespace std::chrono;
 class Matrix {
 public:
     vector<vector<int>> data;
@@ -35,6 +38,14 @@ public:
             cout << '\n';
         }
     }
+
+    void release() {
+        data.clear();
+    }
+
+    ~Matrix() {
+        release();
+    }
 };
 
 vector<vector<int>> read_data(const string& filename) {
@@ -60,18 +71,30 @@ vector<vector<int>> read_data(const string& filename) {
 }
 
 
+void calculate_element(const Matrix& a, const Matrix& b, Matrix& result, int i, int j) {
+    int sum = 0;
+    for (int k = 0; k < a.column_size(); ++k) {
+        sum += a.at(i, k) * b.at(k, j);
+    }
+    result.set(i, j, sum);
+}
+
 void matrix_multiply(const Matrix& a, const Matrix& b, Matrix& result) {
     if (a.column_size() != b.row_size())
         throw invalid_argument("Matrix dimensions do not match for multiplication");
 
     result.data.resize(a.row_size(), vector<int>(b.column_size(), 0));
 
+    vector<thread> threads;
+
     for (int i = 0; i < a.row_size(); ++i) {
         for (int j = 0; j < b.column_size(); ++j) {
-            for (int k = 0; k < a.column_size(); ++k) {
-                result.data[i][j] += a.at(i, k) * b.at(k, j);
-            }
+            threads.emplace_back(calculate_element, cref(a), cref(b), ref(result), i, j);
         }
+    }
+
+    for (auto& t : threads) {
+        t.join();
     }
 }
 
@@ -98,6 +121,8 @@ int main(int argc, char** argv) {
     }
     cout << "Resultant Matrix:" << endl;
     matrixC.print();
+
+    cout << "Matrices released successfully." << endl;
 
     return 0;
 }
