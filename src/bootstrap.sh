@@ -1,8 +1,11 @@
-#Matrix 1: 
-matrix1="../matrices/A"
+#Matrix A: 
+matrixA="../matrices/A"
 
-#Matrix 2:
-matrix2="../matrices/B"
+#Matrix B:
+matrixB="../matrices/B"
 
-# Compile
-./program $matrix1 $matrix2
+#Matrix C:
+matrixC="../matrices/C_result"
+
+#Compile
+./program $matrixA $matrixB $matrixC

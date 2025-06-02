@@ -39,6 +39,19 @@ public:
         }
     }
 
+    void write_to_file(const string& filename) const {
+        ofstream file(filename);
+        if (!file)
+            throw runtime_error("Error opening file: " + filename);
+
+        for (const auto& row : data) {
+            for (const auto& value : row) {
+                file << value << ' ';
+            }
+            file << '\n';
+        }
+    }
+
     void release() {
         data.clear();
     }
@@ -100,9 +113,16 @@ void matrix_multiply(const Matrix& a, const Matrix& b, Matrix& result) {
 
 
 int main(int argc, char** argv) {
+    
+    if (argc != 4) {
+        cerr << "Usage: " << argv[0] << " <matrixA_file> <matrixB_file> <result_file>" << endl;
+        return 1;
+    }
 
+    string filenameC = argv[3];
+    
     Matrix matrixA, matrixB, matrixC;
-
+    
     try {
         matrixA = Matrix(read_data(argv[1]));
         matrixB = Matrix(read_data(argv[2]));
@@ -119,6 +139,14 @@ int main(int argc, char** argv) {
     }
     cout << "Resultant Matrix:" << endl;
     matrixC.print();
+
+    try {
+        matrixC.write_to_file(filenameC);
+        cout << "Result matrix written to " << filenameC << endl;
+    } catch (const exception& e) {
+        cerr << e.what() << endl;
+        return 1;
+    }
 
     cout << "Matrices released successfully." << endl;
 
