@@ -1,1 +1,2 @@
-# multithreads-management
+# Multithreaded management for matrix multiplication
+
