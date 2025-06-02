@@ -27,12 +27,12 @@ public:
         data[row][column] = value;
     }
     
-    void show_matrix() const {
+    void print() const {
         for (const auto& row : data) {
             for (const auto& value : row) {
-                cout << value << " ";
+                cout << value << ' ';
             }
-            cout << endl;
+            cout << '\n';
         }
     }
 };
@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     cout << "Resultant Matrix:" << endl;
-    matrixC.show_matrix();
+    matrixC.print();
 
     return 0;
 }
