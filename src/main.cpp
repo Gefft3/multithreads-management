@@ -104,10 +104,8 @@ int main(int argc, char** argv) {
     Matrix matrixA, matrixB, matrixC;
 
     try {
-        string path_to_A = argv[1];
-        string path_to_B = argv[2];
-        matrixA = Matrix(read_data(path_to_A));
-        matrixB = Matrix(read_data(path_to_B));
+        matrixA = Matrix(read_data(argv[1]));
+        matrixB = Matrix(read_data(argv[2]));
     } catch (const exception& e) {
         cerr << e.what() << endl;
         return 1;
