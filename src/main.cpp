@@ -92,7 +92,7 @@ void calculate_element(const Matrix& a, const Matrix& b, Matrix& result, int i, 
     result.set(i, j, sum);
 }
 
-void matrix_multiply(const Matrix& a, const Matrix& b, Matrix& result) {
+void matrix_multiply_parallel(const Matrix& a, const Matrix& b, Matrix& result) {
     if (a.column_size() != b.row_size())
         throw invalid_argument("Matrix dimensions do not match for multiplication");
 
@@ -108,6 +108,19 @@ void matrix_multiply(const Matrix& a, const Matrix& b, Matrix& result) {
 
     for (auto& t : threads) {
         t.join();
+    }
+}
+
+void matrix_multiply_serial(const Matrix& a, const Matrix& b, Matrix& result) {
+    if (a.column_size() != b.row_size())
+        throw invalid_argument("Matrix dimensions do not match for multiplication");
+
+    result.data.resize(a.row_size(), vector<int>(b.column_size(), 0));
+
+    for (int i = 0; i < a.row_size(); ++i) {
+        for (int j = 0; j < b.column_size(); ++j) {
+            calculate_element(a, b, result, i, j);
+        }
     }
 }
 
@@ -127,15 +140,10 @@ void write_statistics(const string& filename, duration<double> duration, const M
 
 int main(int argc, char** argv) {
     
-    if (argc != 6) {
-        cerr << "Usage: " << argv[0] << " <matrixA_file> <matrixB_file> <matrixC_file> <generate_output> <statistics_file>" << endl;
+    if (argc != 7) {
+        cerr << "Usage: " << argv[0] << " <matrixA_file> <matrixB_file> <matrixC_file> <generate_output> <statistics_file> <method>" << endl;
         return 1;
     }
-
-    string filenameC = argv[3];
-    bool generate_output = (string(argv[4]) == "true");
-    string statistics_file = argv[5];
-
     
     Matrix matrixA, matrixB, matrixC;
     
@@ -148,19 +156,34 @@ int main(int argc, char** argv) {
     }
     
     duration<double> var_duration; 
+    bool use_threads = (string(argv[4]) == "true");
     
     try {
-        auto start = high_resolution_clock::now();
-        matrix_multiply(matrixA, matrixB, matrixC);
-        auto end = high_resolution_clock::now();
-        var_duration = end - start; 
-        cout << "Matrix multiplication completed in " << var_duration.count() << " microseconds." << endl;
+        if (use_threads){
+            auto start = high_resolution_clock::now();
+            matrix_multiply_parallel(matrixA, matrixB, matrixC);
+            auto end = high_resolution_clock::now();
+            var_duration = end - start; 
+            cout << "Matrix multiplication completed in " << var_duration.count() << " microseconds." << endl;
+        }else{
+            auto start = high_resolution_clock::now();
+            matrix_multiply_serial(matrixA, matrixB, matrixC);
+            auto end = high_resolution_clock::now();
+            var_duration = end - start; 
+            cout << "Matrix multiplication completed in " << var_duration.count() << " microseconds." << endl;
+        }
+        
     } catch (const exception& e) {
         cerr << e.what() << endl;
         return 1;
     }
+
     cout << "Resultant Matrix:" << endl;
     matrixC.print();
+
+    string filenameC = argv[3];
+    bool generate_output = (string(argv[4]) == "true");
+    string statistics_file = argv[5];
 
     if (generate_output) {
         try {
