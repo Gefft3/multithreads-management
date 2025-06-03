@@ -111,15 +111,31 @@ void matrix_multiply(const Matrix& a, const Matrix& b, Matrix& result) {
     }
 }
 
+void write_statistics(const string& filename, duration<double> duration, const Matrix& matrixA, const Matrix& matrixB, const Matrix& matrixC) {
+    ofstream stats_file(filename);
+    if (!stats_file)
+        throw runtime_error("Error opening statistics file: " + filename);
+
+    stats_file << "Matrix A size: " << matrixA.row_size() << "x" << matrixA.column_size() << endl;
+    stats_file << "Matrix B size: " << matrixB.row_size() << "x" << matrixB.column_size() << endl;
+    stats_file << "Result Matrix size: " << matrixC.row_size() << "x" << matrixC.column_size() << endl;
+    stats_file << "Matrix multiplication completed in " << duration.count() << " microseconds." << endl;
+
+    stats_file.close();
+}
+
 
 int main(int argc, char** argv) {
     
-    if (argc != 4) {
-        cerr << "Usage: " << argv[0] << " <matrixA_file> <matrixB_file> <result_file>" << endl;
+    if (argc != 6) {
+        cerr << "Usage: " << argv[0] << " <matrixA_file> <matrixB_file> <matrixC_file> <generate_output> <statistics_file>" << endl;
         return 1;
     }
 
     string filenameC = argv[3];
+    bool generate_output = (string(argv[4]) == "true");
+    string statistics_file = argv[5];
+
     
     Matrix matrixA, matrixB, matrixC;
     
@@ -131,8 +147,14 @@ int main(int argc, char** argv) {
         return 1;
     }
     
+    duration<double> var_duration; 
+    
     try {
+        auto start = high_resolution_clock::now();
         matrix_multiply(matrixA, matrixB, matrixC);
+        auto end = high_resolution_clock::now();
+        var_duration = end - start; 
+        cout << "Matrix multiplication completed in " << var_duration.count() << " microseconds." << endl;
     } catch (const exception& e) {
         cerr << e.what() << endl;
         return 1;
@@ -140,13 +162,23 @@ int main(int argc, char** argv) {
     cout << "Resultant Matrix:" << endl;
     matrixC.print();
 
-    try {
-        matrixC.write_to_file(filenameC);
-        cout << "Result matrix written to " << filenameC << endl;
-    } catch (const exception& e) {
-        cerr << e.what() << endl;
-        return 1;
-    }
+    if (generate_output) {
+        try {
+            matrixC.write_to_file(filenameC);
+            cout << "Result matrix written to " << filenameC << endl;
+        } catch (const exception& e) {
+            cerr << e.what() << endl;
+            return 1;
+        }
+
+        try {
+            write_statistics(statistics_file, var_duration, matrixA, matrixB, matrixC);
+            cout << "Statistics written to " << statistics_file << endl;
+        } catch (const exception& e) {
+            cerr << e.what() << endl;
+            return 1;
+        }
+    } 
 
     cout << "Matrices released successfully." << endl;
 

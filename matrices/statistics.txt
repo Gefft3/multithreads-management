@@ -1,0 +1,4 @@
+Matrix A size: 3x2
+Matrix B size: 2x3
+Result Matrix size: 3x3
+Matrix multiplication completed in 0.000496459 microseconds.
