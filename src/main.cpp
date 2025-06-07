@@ -92,6 +92,16 @@ void calculate_element(const Matrix& a, const Matrix& b, Matrix& result, int i, 
     result.set(i, j, sum);
 }
 
+void calculate_row(const Matrix& a, const Matrix& b, Matrix& result, int row) {
+    for (int j = 0; j < b.column_size(); ++j) {
+        int sum = 0;
+        for (int k = 0; k < a.column_size(); ++k) {
+            sum += a.at(row, k) * b.at(k, j);
+        }
+        result.set(row, j, sum);
+    }
+}
+
 void matrix_multiply_parallel(const Matrix& a, const Matrix& b, Matrix& result) {
     if (a.column_size() != b.row_size())
         throw invalid_argument("Matrix dimensions do not match for multiplication");
@@ -101,9 +111,7 @@ void matrix_multiply_parallel(const Matrix& a, const Matrix& b, Matrix& result) 
     vector<thread> threads;
 
     for (int i = 0; i < a.row_size(); ++i) {
-        for (int j = 0; j < b.column_size(); ++j) {
-            threads.emplace_back(calculate_element, cref(a), cref(b), ref(result), i, j);
-        }
+        threads.emplace_back(calculate_row, cref(a), cref(b), ref(result), i);
     }
 
     for (auto& t : threads) {
@@ -143,6 +151,10 @@ void write_statistics(
     stats_file << "teste" << endl;
     stats_file << "Time taken for serial multiplication: " << duration_serial.count() << " microseconds" << endl;
     stats_file << "Time taken for parallel multiplication: " << duration_parallel.count() << " microseconds" << endl;
+    
+    double speedup = duration_serial.count() / duration_parallel.count();
+    stats_file << "Speedup: " << speedup << "x" << endl;
+    
     stats_file.close();
 }
 
