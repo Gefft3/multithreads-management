@@ -1,5 +1,0 @@
-Matrix A size: 499x500
-Matrix B size: 500x501
-Result Matrix size: 499x501
-Time taken for serial multiplication: 6.36378 microseconds
-Time taken for parallel multiplication: 6.88809 microseconds
