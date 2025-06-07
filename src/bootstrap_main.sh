@@ -1,11 +1,11 @@
 #Path to Matrix A: 
-matrixA="../matrices/A"
+matrixA="../matrices/mock/A.txt"
 
 #Path to Matrix B:
-matrixB="../matrices/B"
+matrixB="../matrices/mock/B.txt"
 
 #Path to Matrix C (output matrix):
-matrixC="../matrices/C_result"
+matrixC="../matrices/mock/C_result.txt"
 
 #Output should be generated
 generate_output="true"
@@ -14,7 +14,7 @@ generate_output="true"
 use_parallel="true"
 
 # Path to statistics file
-statistics_file="../matrices/statistics.txt"
+statistics_file="../matrices//mock/statistics.txt"
 
 #Compile
 ./program $matrixA $matrixB $matrixC $generate_output $statistics_file $use_parallel

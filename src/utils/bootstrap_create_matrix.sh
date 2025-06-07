@@ -2,12 +2,12 @@
 
 root='../../matrices/mock/'
 
-matrix_a_rows=19
-matrix_a_cols=20
+matrix_a_rows=499
+matrix_a_cols=500
 matrix_a_filename=$root"A.txt"
 
-matrix_b_rows=20
-matrix_b_cols=19
+matrix_b_rows=500
+matrix_b_cols=501
 matrix_b_filename=$root"B.txt"
 
 # make sure the matrices directory exists

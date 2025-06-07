@@ -124,7 +124,15 @@ void matrix_multiply_serial(const Matrix& a, const Matrix& b, Matrix& result) {
     }
 }
 
-void write_statistics(const string& filename, duration<double> duration, const Matrix& matrixA, const Matrix& matrixB, const Matrix& matrixC) {
+void write_statistics(
+    const string& filename, 
+    duration<double> duration_serial,
+    duration<double> duration_parallel, 
+    const Matrix& matrixA, 
+    const Matrix& matrixB, 
+    const Matrix& matrixC) 
+{
+
     ofstream stats_file(filename);
     if (!stats_file)
         throw runtime_error("Error opening statistics file: " + filename);
@@ -132,8 +140,9 @@ void write_statistics(const string& filename, duration<double> duration, const M
     stats_file << "Matrix A size: " << matrixA.row_size() << "x" << matrixA.column_size() << endl;
     stats_file << "Matrix B size: " << matrixB.row_size() << "x" << matrixB.column_size() << endl;
     stats_file << "Result Matrix size: " << matrixC.row_size() << "x" << matrixC.column_size() << endl;
-    stats_file << "Matrix multiplication completed in " << duration.count() << " microseconds." << endl;
-
+    stats_file << "teste" << endl;
+    stats_file << "Time taken for serial multiplication: " << duration_serial.count() << " microseconds" << endl;
+    stats_file << "Time taken for parallel multiplication: " << duration_parallel.count() << " microseconds" << endl;
     stats_file.close();
 }
 
@@ -155,31 +164,22 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    duration<double> var_duration; 
-    bool use_threads = (string(argv[4]) == "true");
+    duration<double> var_duration_serial, var_duration_parallel; 
     
-    try {
-        if (use_threads){
-            auto start = high_resolution_clock::now();
-            matrix_multiply_parallel(matrixA, matrixB, matrixC);
-            auto end = high_resolution_clock::now();
-            var_duration = end - start; 
-            cout << "Matrix multiplication completed in " << var_duration.count() << " microseconds." << endl;
-        }else{
-            auto start = high_resolution_clock::now();
-            matrix_multiply_serial(matrixA, matrixB, matrixC);
-            auto end = high_resolution_clock::now();
-            var_duration = end - start; 
-            cout << "Matrix multiplication completed in " << var_duration.count() << " microseconds." << endl;
-        }
-        
-    } catch (const exception& e) {
-        cerr << e.what() << endl;
-        return 1;
-    }
+    auto start_serial = high_resolution_clock::now();
+    matrix_multiply_serial(matrixA, matrixB, matrixC);
+    auto end_serial = high_resolution_clock::now();
+    var_duration_serial = end_serial - start_serial; 
+    cout << "Serial multiplication completed in " << var_duration_serial.count() << " microseconds." << endl;
 
-    cout << "Resultant Matrix:" << endl;
-    matrixC.print();
+    auto start_parallel = high_resolution_clock::now();
+    matrix_multiply_parallel(matrixA, matrixB, matrixC);
+    auto end_parallel = high_resolution_clock::now();
+    var_duration_parallel = end_parallel - start_parallel; 
+    cout << "Parallel multiplication completed in " << var_duration_parallel.count() << " microseconds." << endl;
+
+    // cout << "Resultant Matrix:" << endl;
+    // matrixC.print();
 
     string filenameC = argv[3];
     bool generate_output = (string(argv[4]) == "true");
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
         }
 
         try {
-            write_statistics(statistics_file, var_duration, matrixA, matrixB, matrixC);
+            write_statistics(statistics_file, var_duration_serial, var_duration_parallel, matrixA, matrixB, matrixC);
             cout << "Statistics written to " << statistics_file << endl;
         } catch (const exception& e) {
             cerr << e.what() << endl;
